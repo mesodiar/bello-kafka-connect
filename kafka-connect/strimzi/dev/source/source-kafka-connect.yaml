@@ -1,0 +1,24 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: source-kafka-connect-cluster
+  namespace: kafka
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  image: asia.gcr.io/data-platform-dev-333007/kafka-connect-source:v1.0.0
+  version: 3.2.3
+  replicas: 1
+  bootstrapServers: kafka-cluster-kafka-bootstrap:9092
+  config:
+    group.id: source-kafka-connect-cluster
+    offset.storage.topic: source-kafka-connect-cluster-offsets
+    config.storage.topic: source-kafka-connect-cluster-configs
+    status.storage.topic: source-kafka-connect-cluster-status
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: true
+    value.converter.schemas.enable: true
+    config.storage.replication.factor: 3
+    offset.storage.replication.factor: 3
+    status.storage.replication.factor: 3

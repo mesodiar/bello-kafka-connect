@@ -1,0 +1,45 @@
+# To use the KafkaConnector resource you have to first enable the connector operator using
+# the strimzi.io/use-connector-resources annotation on the KafkaConnect custom resource.
+# From Apache Kafka 3.1.1 and 3.2.0 you also have to add the FileStreamSourceConnector
+# connector to the container image. You can do that using the kafka-connect-build.yaml example.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: sink-gcs-connector
+  namespace: kafka
+  labels:
+    # The strimzi.io/cluster label identifies the KafkaConnect instance
+    # in which to create this connector. That KafkaConnect instance
+    # must have the strimzi.io/use-connector-resources annotation
+    # set to true.
+    strimzi.io/cluster: sink-kafka-connect-cluster
+spec:
+  class: io.aiven.kafka.connect.gcs.GcsSinkConnector
+  tasksMax: 2
+  config: 
+    file: /opt/kafka/LICENSE 
+    topics: cloudSQL.dbo.employee
+    tasks.max: 1
+    format.output.type: "jsonl"
+    # key.converter: "org.apache.kafka.connect.storage.StringConverter"
+    # value.converter: "io.confluent.connect.avro.AvroConverter"
+    value.converter.schema.registry.url: "http://schema-registry-cp-schema-registry:8081"
+    key.converter.schemas.enable: false
+    value.converter.schemas.enable: "false"
+    gcs.bucket.name: "mils-avro-test"
+    file.name.prefix: "landing/planogram/"
+    file.compression.type: "gzip"
+    format.output.fields: "key,value,offset,timestamp"
+    gcs.credentials.json: |
+      {
+        "type": "service_account",
+        "project_id": "xxxxx",
+        "private_key_id": "xxxxx",
+        "private_key": "xxxx",
+        "client_email": "dp-dev@xxxxx.iam.gserviceaccount.com",
+        "client_id": "xxxx",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dp-dev%40xxxxx.iam.gserviceaccount.com"
+      }

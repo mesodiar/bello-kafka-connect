@@ -1,0 +1,28 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: sink-kafka-connect-cluster
+  namespace: kafka
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  image: asia.gcr.io/data-platform-dev-333007/kafka-connect-sink:v1.0.0
+  version: 3.2.3
+  replicas: 1
+  bootstrapServers: kafka-cluster-kafka-bootstrap:9092
+  config:
+    group.id: sink-kafka-connect-cluster
+    offset.storage.topic: sink-kafka-connect-cluster-offsets
+    config.storage.topic: sink-kafka-connect-cluster-configs
+    status.storage.topic: sink-kafka-connect-cluster-status
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: true
+    value.converter.schemas.enable: true
+    config.storage.replication.factor: 3
+    offset.storage.replication.factor: 3
+    status.storage.replication.factor: 3
+    ssl.cipher.suites: "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+    ssl.enabled.protocols: "TLSv1.2"
+    ssl.protocol: "TLSv1.2"
+    ssl.endpoint.identification.algorithm: HTTPS

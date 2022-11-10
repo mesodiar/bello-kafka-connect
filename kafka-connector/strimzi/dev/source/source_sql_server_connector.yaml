@@ -1,0 +1,41 @@
+# To use the KafkaConnector resource you have to first enable the connector operator using
+# the strimzi.io/use-connector-resources annotation on the KafkaConnect custom resource.
+# From Apache Kafka 3.1.1 and 3.2.0 you also have to add the FileStreamSourceConnector
+# connector to the container image. You can do that using the kafka-connect-build.yaml example.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: source-pub-sql-server-connector
+  namespace: kafka
+  labels:
+    # The strimzi.io/cluster label identifies the KafkaConnect instance
+    # in which to create this connector. That KafkaConnect instance
+    # must have the strimzi.io/use-connector-resources annotation
+    # set to true.
+    strimzi.io/cluster: source-kafka-connect-cluster
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  tasksMax: 1
+  config:   
+    topic: cloudSQL.dbo.employee
+    connector.class: io.debezium.connector.sqlserver.SqlServerConnector
+    database.hostname: 34.124.160.104
+    database.port: 1433
+    database.dbname: yaki
+    database.user: sqlserver
+    database.password: '0909747123'
+    database.server.name: cloudSQL
+    database.history.kafka.bootstrap.servers: kafka-cluster-kafka-bootstrap:9092
+    database.history.kafka.topic: booboo.history.employee-topic
+    # key.converter.schema.registry.url: schema-registry-cp-schema-registry:8081
+    # key.converter: org.apache.kafka.connect.storage.StringConverter
+    key.converter.schemas.enable: false
+    # value.converter: org.apache.kafka.connect.json.JsonConverter
+    # value.converter.schema.registry.url: schema-registry-cp-schema-registry:8081
+    value.converter.schemas.enable: false
+    table.whitelist: dbo.employee
+    offset.flush.interval.ms: 15000
+    errors.deadletterqueue.topic.name: cdc_employee-topic
+    poll.interval.ms: 1000
+    errors.tolerance: all
+    snapshot.mode: initial
