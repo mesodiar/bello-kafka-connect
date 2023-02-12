@@ -1,0 +1,30 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: restricted-user
+  namespace: kafka-mils
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  authentication:
+    type: tls
+  authorization:
+    type: simple
+    acls:
+      - resource:
+          type: topic
+          name: my-topic-na-ja
+          patternType: literal
+        operation: All
+      - resource:
+          type: group
+          name: de-group
+          patternType: literal
+        operations:
+          - Read
+      - resource:
+          type: cluster
+          name: "*"
+          name: my-cluster
+          patternType: literal
+        operation: All
